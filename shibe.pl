@@ -8,11 +8,23 @@ use POSIX;
 #for shuffle
 use List::Util qw(shuffle reduce);
 
+# colors list
+#  0 == white
+#  4 == light red
+#  8 == yellow
+#  9 == light green
+# 11 == light cyan
+# 12 == light blue
+# 13 == light magenta
+my @colors = ('4', '8', '9', '11', '12', '13');
+
 #Usage: /shibe words, or messages separated, by,commas
 sub cmd_shibe {
   my ($data, $server, $witem) = @_;
 
   my @words = ();
+
+  my @mycolor = ();
 
   if (!$server || !$server->{connected}) {
     Irssi::print("Not connected to server");
@@ -43,6 +55,13 @@ sub cmd_shibe {
     s/^\s+//;
   }
 
+  if ($words[0] eq "-r") {
+    @mycolor = @colors;
+    splice(@words, 0, 1);
+  } else {
+    push(@mycolor, 4); # light red
+  }
+
   my @shuffled = shuffle @words;
 
   my $longest = reduce{ length($a) > length($b) ? $a : $b } @shuffled;
@@ -61,7 +80,12 @@ sub cmd_shibe {
 
   for (@shuffled) {
 #    Irssi::print("printing: ".$_);
-    $witem->command("MSG ".$witem->{name}." ". (" "x pop(@shuffled_paddings)) . $_);
+    my $newstr = "";
+    $newstr .= $witem->{name} . " ";
+    $newstr .= " "x pop(@shuffled_paddings);
+    $newstr .= "\003" . sprintf("%02d", $mycolor[rand @mycolor]);
+    $newstr .= $_;
+    $witem->command("MSG ".$newstr);
   }
 }
 
