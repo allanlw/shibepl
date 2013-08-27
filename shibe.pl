@@ -59,7 +59,11 @@ sub cmd_shibe {
     @mycolor = @colors;
     splice(@words, 0, 1);
   } else {
-    push(@mycolor, 4); # light red
+    if ($words[0] eq "-nc") {
+      splice(@words, 0, 1);
+    } else {
+      push(@mycolor, 4); # light red
+    }
   }
 
   my @shuffled = shuffle @words;
@@ -83,7 +87,9 @@ sub cmd_shibe {
     my $newstr = "";
     $newstr .= $witem->{name} . " ";
     $newstr .= " "x pop(@shuffled_paddings);
-    $newstr .= "\003" . sprintf("%02d", $mycolor[rand @mycolor]);
+    if ($#mycolor > 0) {
+      $newstr .= "\003" . sprintf("%02d", $mycolor[rand @mycolor]);
+    }
     $newstr .= $_;
     $witem->command("MSG ".$newstr);
   }
